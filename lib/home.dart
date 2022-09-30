@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:memory_game/choice_model.dart';
+import 'package:memory_game/select_card.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -64,22 +66,26 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  // To generate A to H chars list
   List<Choice> generateAtoHList() {
     final choiceList = List.generate(
         8, (index) => Choice(title: String.fromCharCode(index + 65)));
     return choiceList;
   }
 
+  // To generate shuffled list
   List<Choice> shuffleList() {
     List<Choice> list = [...generateAtoHList(), ...generateAtoHList()];
     list.shuffle();
     return list;
   }
 
+
   void gameLogic(int index) {
+
     if (pair.length < 2) {
-      choices[index].visibility = VisibleState.VISIABLE;
-      pair.add(choices[index]);
+      choices[index].visibility = VisibleState.VISIBLE; // Visible card on tap
+      pair.add(choices[index]); // Add grid item in pair on tap of card
       setState(() {});
     }
 
@@ -87,13 +93,13 @@ class _MyHomePageState extends State<MyHomePage> {
       if (enableTap) {
         enableTap = false; // Disable tap for 3 seconds to avoid multiple taps in between delay
         Future.delayed(const Duration(seconds: 3), () {
-          if (pair[0].title == pair[1].title) {
+          if (pair[0].title == pair[1].title) { // if pair of card is matched then hide both paired cards
             pair[0].visibility = VisibleState.GONE;
             pair[1].visibility = VisibleState.GONE;
             matchCount++; // Total Matches
           } else {
-            pair[0].visibility = VisibleState.INVISIABLE;
-            pair[1].visibility = VisibleState.INVISIABLE;
+            pair[0].visibility = VisibleState.INVISIBLE;
+            pair[1].visibility = VisibleState.INVISIBLE;
           }
           attemptCount++; // Total Attempts
           pair.clear(); // If pair is full then clear it
@@ -105,35 +111,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-enum VisibleState { GONE, VISIABLE, INVISIABLE }
+// GONE is for hide card
+// VISIBLE is for show character
+// INVISIABLE is for hide character
+enum VisibleState { GONE, VISIBLE, INVISIBLE }
 
-class Choice {
-  final String title;
-  VisibleState visibility;
 
-  Choice({required this.title, this.visibility = VisibleState.INVISIABLE});
-}
 
-class SelectCard extends StatelessWidget {
-  const SelectCard({Key? key, required this.choice}) : super(key: key);
-  final Choice choice;
 
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle? textStyle = Theme.of(context).textTheme.headline4;
-    return Visibility(
-      visible: choice.visibility != VisibleState.GONE,
-      child: Card(
-          color: Colors.orange,
-          child: Visibility(
-            maintainSize: true,
-            maintainAnimation: true,
-            maintainState: true,
-            visible: choice.visibility == VisibleState.VISIABLE,
-            child: Center(
-              child: Text(choice.title, style: textStyle),
-            ),
-          )),
-    );
-  }
-}
